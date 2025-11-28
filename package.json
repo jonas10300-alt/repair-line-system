@@ -1,8 +1,11 @@
 {
-  "name": "repair-line-airtable",
+  "name": "repair-line-system",
   "version": "1.0.0",
+  "main": "api/webhook.js",
   "type": "module",
   "dependencies": {
-    "node-fetch": "^3.3.2"
+    "@line/bot-sdk": "latest",
+    "express": "latest",
+    "axios": "latest"
   }
 }
