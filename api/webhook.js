@@ -1,35 +1,27 @@
-import express from "express";
-import { Client, middleware } from "@line/bot-sdk";
+import { Client } from "@line/bot-sdk";
 
-const app = express();
+export default async function handler(req, res) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ message: "Only POST allowed" });
+    }
 
-const config = {
-  channelAccessToken: process.env.LINE_ACCESS_TOKEN,
-  channelSecret: process.env.LINE_CHANNEL_SECRET
-};
-
-const client = new Client(config);
-
-// Webhook 接收
-app.post("/api/webhook", middleware(config), (req, res) => {
-  Promise
-    .all(req.body.events.map(handleEvent))
-    .then((result) => res.json(result))
-    .catch((err) => {
-      console.error("Webhook Error:", err);
-      res.status(500).end();
+    const client = new Client({
+      channelAccessToken: process.env.LINE_ACCESS_TOKEN,
+      channelSecret: process.env.LINE_CHANNEL_SECRET
     });
-});
 
-// 處理訊息
-function handleEvent(event) {
-  if (event.type !== "message" || event.message.type !== "text") return;
+    const event = req.body?.events?.[0]; 
+    if (!event) return res.status(200).send("OK");
 
-  return client.replyMessage(event.replyToken, {
-    type: "text",
-    text: "報修系統已連線成功！"
-  });
+    await client.replyMessage(event.replyToken, {
+      type: "text",
+      text: "報修已收到！"
+    });
+
+    return res.status(200).send("OK");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.toString() });
+  }
 }
-
-app.listen(3000, () => console.log("Webhook server running"));
-export default app;
